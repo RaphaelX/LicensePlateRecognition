@@ -14,24 +14,15 @@ def get_boxes(detections):
         
     return boxes
 
-def cropped_plates(img_path, boxes, aug0=40,aug1=40,aug2=40,aug3=40):
+def cropped_plates(img_path, boxes, aug0=5,aug1=5,aug2=5,aug3=5):
     #increase boxes to deal with prediction's imprecision
-    aug_boxes = np.array([-int(0.*aug0),int(aug1),-int(aug2),int(0.*aug3)])
+    aug_boxes = np.array([-int(aug0),-int(aug1),int(aug2),int(aug3)])
     boxes += aug_boxes
 
     cropped_images = []
     img = cv2.imread(img_path) 
-    cv2.resize(img, (416,416))
     for box in boxes:
-    #trying to fix bug of ImageAI
-    # height, width = img.shape[:2]
-    # for i in range(4):
-    #   if i<2:
-    #     box[i]*=width/416.
-    #   else:
-    #     box[i]*=height/416.
-        cropped = img[int(box[2]):int(box[3]),int(box[0]):int(box[1])]
-        print(box)
+        cropped = img[int(box[1]):int(box[3]),int(box[0]):int(box[2])]
     cropped_images.append(cropped)
 
     return cropped_images
@@ -73,12 +64,12 @@ def binarization_gaussian(img):
     img = cv2.adaptiveThreshold(img,255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,cv2.THRESH_BINARY, 11,2)
     return img
 
-def save_result(img, output_path, file_name):
+def result(img, output_path, file_name):
     # Recognize text with tesseract for python
     result = pytesseract.image_to_string(img, lang="eng")
 
     # Save the filtered image in the output directory
-    save_path = os.path.join(output_path, file_name + "_"+ result+".jpg")
+    save_path = os.path.join(output_path, result+".jpg")
     cv2.imwrite(save_path, img)
 
     return result
