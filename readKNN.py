@@ -131,22 +131,3 @@ def writeLicensePlateCharsOnImage(imgOriginalScene, licPlate):
 # end function
 
 ###################################################################################################
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -6,10 +6,10 @@ from read_plate import *
 import argparse
 
 input_image = "voiture2.jpg"
-output_image = "voiture2-detected.jpg"
-model_path = "plates/models/detection_model-ex-001--loss-0005.291.h5"
-json_path = "drive/My Drive/Colab Notebooks/plates/json/detection_config.json"
-read_algorithm = 2
+output_image = input_image[:-4]+"-detected.jpg"
+model_path = "detection_model-ex-040--loss-0001.633.h5"
+json_path = "detection_config_2.json"
+read_algorithm = '3'
 
 def detect(input_image=input_image, output_image=output_image, model_path=model_path, json_path=json_path):
     #######################################Usage of the model for detection#######################################
@@ -22,11 +22,30 @@ def detect(input_image=input_image, output_image=output_image, model_path=model_
     detector.setJsonPath(json_path)
     detector.loadModel()
     detections = detector.detectObjectsFromImage(input_image, output_image)
-    for detection in detections:
-        print(detection["name"], " : ", detection["percentage_probability"], " : ", detection["box_points"])
+    # for detection in detections:
+    #     print(detection["name"], " : ", detection["percentage_probability"], " : ", detection["box_points"])
     ##############################################################################################################
     return detections
 
+def plates_detected(input_image=input_image, output_image=output_image, model_path=model_path, json_path=json_path,read='3'):
+    detections = detect(input_image, output_image, model_path, json_path)
+
+    boxes = get_boxes(detections)
+    crpd_plates = cropped_plates(img_path=input_image, boxes=boxes)
+    
+    #loop over the cropped images containing the plates
+    plates_detected=[]
+    for i in range(len(crpd_plates)):
+        img = crpd_plates[i]
+        if read_algorithm=='1':
+            result = read_plate1(img, input_image)
+        if read_algorithm=='2':
+            result = read_plate2(img, input_image)
+        if read_algorithm=='3':
+            result = read_plate3(img, input_image)
+        plates_detected.append(result)
+        # cv2.imwrite('cropped_images/'+result+".jpg", img)    
+    return plates_detected
 
 if __name__=="__main__":
 
@@ -38,24 +57,6 @@ if __name__=="__main__":
     parser.add_argument("-r", "--read_algorithm", help="algorithm to read detected plate",default=read_algorithm)                    
 
     args = parser.parse_args()
-
-    # detections = detect(args.input_image, args.output_image, args.model_path, args.json_path)
-
-    # boxes = get_boxes(detections)
-    # crpd_plates = cropped_plates(img_path=input_image, boxes=boxes)
-    if not os.path.exists('cropped_images'):
-        os.makedirs('cropped_images')
-
-    crpd_plates = [cv2.imread(args.input_image)]
-
-    #loop over the cropped images containing the plates
-    for i in range(len(crpd_plates)):
-        img = crpd_plates[i]
-        if args.read_algorithm=='1':
-            result = read_plate1(img, args.input_image)
-        if args.read_algorithm=='2':
-            result = read_plate2(img, args.input_image)
-        if args.read_algorithm=='3':
-            result = read_plate3(img, args.input_image)
-        print(result)
-        cv2.imwrite('cropped_images/'+result+".jpg", img)
+    
+    plates = plates_detected(args.input_image, args.output_image, args.model_path, args.json_path, args.read_algorithm)
+    print(plates)

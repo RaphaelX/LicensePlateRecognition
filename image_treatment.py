@@ -10,7 +10,7 @@ def get_boxes(detections):
     boxes = []
     for detection in detections:
         boxes.append(detection["box_points"])
-        boxes = np.array(boxes)
+    boxes = np.array(boxes)
         
     return boxes
 
